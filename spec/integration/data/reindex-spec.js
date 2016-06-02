@@ -1,66 +1,95 @@
+'use strict';
+
 var Promise = require('bluebird');
 
 // TODO: This needs to be a dynamic option in some way. Maybe a ENV var.
-var DOCKER_HOST = 'docker';
+var DOCKER_IP = 'docker';
 
 var compose = require('docker-compose-js')(__dirname + '/../../docker-compose.yml');
 var elasticsearch = require('elasticsearch');
-var es_client;
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 
 describe('reindex', function() {
+    var es_client;
+    var teraslice;
 
-    beforeEach(function(done) {
+    beforeAll(function(done) {
         compose.up()
             .then(function() {
-                function prepare() {
-                    return [
-                        es_client.indices.delete({ index: 'teracluster__jobs', ignore: [404] }),
-                        es_client.indices.delete({ index: 'teracluster__state', ignore: [404] }),
-                        es_client.indices.delete({ index: 'teracluster__analytics', ignore: [404] })
-                    ]
+                function waitForTeraslice() {
+                    // There is latency in the time from when elasticsearch
+                    // becomes available and Teraslice reconnects to ES.
+                    return teraslice.jobs
+                        .list()
+                        .then(done)
+                        .catch(function(err) {
+                            // keep retrying until it succeeds
+                            setTimeout(waitForTeraslice, 1000);
+                        });
                 }
 
-                function ping() {
-                    // TODO: this should probably search on the particular index being tested.
+                function waitForES() {
+                    // Elasticsearch takes some time to initialize so we have
+                    // to wait for it to really become available.
                     return es_client
                         .search({
                             requestTimeout: 1000,
-                            index: 'marvel-*',
+                            index: 'example-logs',
                             q: '*'
                         })
-                        .then(function() {
-                            return Promise.all(prepare()).then(done);
-                        })
+                        .then(waitForTeraslice)
                         .catch(function(err) {
                             // keep retrying until it succeeds
-                            setTimeout(ping, 1000);
+                            setTimeout(waitForES, 1000);
                         });
                 }
 
                 es_client = new elasticsearch.Client({
-                    host: 'http://' + DOCKER_HOST + ':9200',
+                    host: 'http://' + DOCKER_IP + ':9200',
                     log: '' // This suppresses error logging from the ES library.
                 })
 
-                ping();
+                teraslice = require('teraslice-client-js')({
+                    host: 'http://' + DOCKER_IP + ':5678'
+                });
+
+                waitForES();
             })
             .catch(function(err) {
                 console.log(err);
                 done();
             });
+
     });
 
-    afterEach(function(done) {
+    beforeEach(function(done) {
+        function prepare() {
+            return [
+                es_client.indices.delete({ index: 'teracluster__jobs', ignore: [404] }),
+                es_client.indices.delete({ index: 'teracluster__state', ignore: [404] }),
+                es_client.indices.delete({ index: 'teracluster__analytics', ignore: [404] })
+            ]
+        }
+
+        Promise.all(prepare()).then(done);
+    });
+
+    afterAll(function(done) {
         compose.down()
             .catch(console.log)
             .finally(done);
     })
 
-    it('should reindex data', function() {
+    it('should reindex data', function(done) {
+        var job_spec = require('../../fixtures/jobs/data_generator.json');
 
-        compose.ps().then(console.log);
+        teraslice.jobs.submit(job_spec)
+            .then(function(job) {
+                expect(job).toBeDefined();
+                expect(job.id()).toBeDefined();
+                done();
+            });
 
         /*expect(processor).toBeDefined();
         expect(processor.newProcessor).toBeDefined();
