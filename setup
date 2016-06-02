@@ -1,0 +1,18 @@
+if [ -z "${DOCKER_IP}" ]; then
+    echo "DOCKER_IP must be set to the IP/Host for your docker daemon"
+fi
+
+echo "--> Starting the docker-compose environment"
+docker-compose -f spec/docker-compose.yml up -d
+
+echo "--> Sleeping 30 seconds to wait for Elasticsearch to initialize"
+sleep 30
+
+echo "--> Submitting jobs to generate test data"
+curl -XPOST "$DOCKER_IP:5678/jobs" -d@spec/fixtures/jobs/data_generator.json
+
+echo "--> Allowing 5 minutes for jobs to run."
+sleep 300
+
+echo "--> Stopping the docker-compose environment"
+docker-compose -f spec/docker-compose.yml down
