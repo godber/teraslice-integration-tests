@@ -14,7 +14,7 @@ For the tests to run there needs to be data in the elasticsearch instance. There
 
 ```
 npm install
-./setup
+npm run setup
 ```
 
 ## Running the test suite

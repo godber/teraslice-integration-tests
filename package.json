@@ -4,7 +4,8 @@
   "description": "Teraslice integration test suite",
   "main": "index.js",
   "scripts": {
-    "test": "node node_modules/jasmine/bin/jasmine"
+    "test": "node node_modules/jasmine/bin/jasmine",
+    "setup": "node scripts/setup.js"
   },
   "repository": {
     "type": "git",
