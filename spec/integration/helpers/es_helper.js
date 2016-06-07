@@ -11,8 +11,6 @@ module.exports = function(es_client) {
             setTimeout(function() {
                 es_client.indices.stats({ index: indexName })
                     .then(function(stats) {
-console.log(stats._all.total.docs)
-
                         resolve(stats._all.total.docs);
                     })
                     .catch(function(err) {
@@ -22,7 +20,22 @@ console.log(stats._all.total.docs)
         });
     }
 
+    function cleanup(cleanup_jobs) {
+        var deletions = [
+            es_client.indices.delete({ index: 'teracluster__state', ignore: [404] }),
+            es_client.indices.delete({ index: 'teracluster__analytics', ignore: [404] }),
+            es_client.indices.delete({ index: 'test-*', ignore: [404] })
+        ]
+
+        if (cleanup_jobs) {
+            deletions.push(es_client.indices.delete({ index: 'teracluster__jobs', ignore: [404] }));
+        }
+
+        return Promise.all(deletions)
+    }
+
     return {
-        documentCountForIndex: documentCountForIndex
+        documentCountForIndex: documentCountForIndex,
+        cleanup: cleanup
     }
 }

@@ -12,6 +12,7 @@ module.exports = function(compose_file) {
 
     var es_client;
     var teraslice;
+    var es_helper;
 
     function dockerUp(index_to_watch) {
         if (! index_to_watch) index_to_watch = 'teracluster__jobs';
@@ -45,8 +46,11 @@ module.exports = function(compose_file) {
                         q: '*'
                     })
                     .then(function() {
-                        console.log("--> Waiting for Teraslice to be ready.");
-                        waitForTeraslice();
+                        console.log("--> Cleaning up old data in Elasticsearch.");
+                        es_helper.cleanup(false).then(function() {
+                            console.log("--> Waiting for Teraslice to be ready.");
+                            waitForTeraslice();
+                        })
                     })
                     .catch(function(err) {
                         // keep retrying until it succeeds
@@ -60,6 +64,8 @@ module.exports = function(compose_file) {
                         host: 'http://' + DOCKER_IP + ':9200',
                         log: '' // This suppresses error logging from the ES library.
                     })
+
+                    es_helper = require('./es_helper')(es_client);
 
                     teraslice = require('teraslice-client-js')({
                         host: 'http://' + DOCKER_IP + ':5678'
@@ -75,9 +81,13 @@ module.exports = function(compose_file) {
     }
 
     function dockerDown() {
-        console.log("--> Stopping Docker environment.");
+        console.log("\n--> Stopping Docker environment.");
 
-        return compose.down();
+        return es_helper
+            .cleanup(false)
+            .then(function() {
+                return compose.down();
+            });
     }
 
     return {

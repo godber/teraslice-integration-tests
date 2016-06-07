@@ -27,7 +27,7 @@ services:
         #- ./fixtures/data/es1:/usr/share/elasticsearch/data
     environment:
         - ES_HEAP_SIZE=2G
-    command: elasticsearch -Des.network.host=0.0.0.0
+    command: elasticsearch -Des.network.host=0.0.0.0 -Dthreadpool.bulk.queue_size=2000
 volumes:
   testdata:
     external: false
