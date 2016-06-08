@@ -17,6 +17,7 @@ describe('teraslice - ', function() {
     beforeAll(function(done) {
         setup.dockerUp('example-logs-10')
             .then(function(connections) {
+                connections.setup = setup;
                 suites.forEach(function(suite) {
                     suite(connections);
                 });

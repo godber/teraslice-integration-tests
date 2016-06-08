@@ -90,8 +90,14 @@ module.exports = function(compose_file) {
             });
     }
 
+    // Adds teraslice-workers to the environment
+    function scale(count) {
+        return compose.scale('teraslice-worker=' + count)
+    }
+
     return {
         dockerUp: dockerUp,
-        dockerDown: dockerDown
+        dockerDown: dockerDown,
+        scale: scale
     }
 }

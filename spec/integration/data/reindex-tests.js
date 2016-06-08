@@ -79,29 +79,28 @@ module.exports = function() {
         });
 
 
-        xit('should reindex data 1000 times', function(done) {
+        it('should reindex data 10 times', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
-            job_spec.operations[1].index = 'test-reindex-1000times';
+            job_spec.operations[1].index = 'test-reindex-10times';
 
-            var iterations = 10;
+            var iterations = 100;
             var jobs = [];
-    console.log("Submitting jobs")
+
             for (var i = 0; i < iterations; i++) {
                 jobs.push(teraslice.jobs.submit(job_spec));
             }
 
             Promise
                 .map(jobs, function(job) {
-    console.log(job.id());
                     expect(job).toBeDefined();
                     expect(job.id()).toBeDefined();
 
                     return job.waitForStatus('completed')
-                        .then(function() { console.log("Got completed") });
+                        //.then(function() { console.log("Got completed") });
                 })
                 .all()
                 .then(function() {
-                    return es_helper.documentCountForIndex('test-reindex-1000times')
+                    return es_helper.documentCountForIndex('test-reindex-10times')
                         .then(function(stats) {
                             expect(stats.count).toBe(10 * iterations);
                             expect(stats.deleted).toBe(0);
