@@ -26,7 +26,7 @@ module.exports = function() {
      * reject.
      */
     function waitForValue(func, value, iterations) {
-        if (! iterations) iterations = 10;
+        if (! iterations) iterations = 100;
         var counter = 0;
 
         return new Promise(function(resolve, reject) {

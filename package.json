@@ -25,6 +25,7 @@
   "dependencies": {
     "bluebird": "^3.4.0",
     "docker-compose-js": "terascope/docker-compose-js",
+    "teraslice-client-js": "terascope/teraslice-client-js",
     "elasticsearch": "^11.0.1",
     "jasmine": "^2.4.1",
     "lodash": "^4.13.1"

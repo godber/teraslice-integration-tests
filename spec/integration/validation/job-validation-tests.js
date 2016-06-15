@@ -7,7 +7,7 @@ module.exports = function() {
     var teraslice, es_client, es_helper;
 
     describe('job validation', function() {
-        xit('job should be rejected with empty index selector index name', function(done) {
+        it('job should be rejected with empty index selector index name', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[1].index = ''; // index selector
 

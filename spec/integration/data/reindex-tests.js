@@ -7,7 +7,7 @@ module.exports = function() {
     var teraslice, es_client, es_helper;
 
     describe('reindex', function() {
-        it('should reindex data', function(done) {
+        xit('should reindex data', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[1].index = 'test-reindex-10';
 
@@ -30,7 +30,7 @@ module.exports = function() {
                 .finally(done)
         });
 
-        xit('job should complete after lifecycle changes', function(done) {
+        it('job should complete after lifecycle changes', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             // Job needs to be able to run long enough to cycle
             job_spec.operations[0].index = 'example-logs-10000';
@@ -61,7 +61,7 @@ module.exports = function() {
                             return job.waitForStatus('stopped');
                         })
                         .then(function() {
-                            return job.start();
+                            return job.start({ recover: true });
                         })
                         .then(function() {
                             return job.waitForStatus('completed');
@@ -79,11 +79,11 @@ module.exports = function() {
         });
 
 
-        it('should reindex data 10 times', function(done) {
+        xit('should reindex data 10 times', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[1].index = 'test-reindex-10times';
 
-            var iterations = 100;
+            var iterations = 10;
             var jobs = [];
 
             for (var i = 0; i < iterations; i++) {
@@ -95,8 +95,7 @@ module.exports = function() {
                     expect(job).toBeDefined();
                     expect(job.id()).toBeDefined();
 
-                    return job.waitForStatus('completed')
-                        //.then(function() { console.log("Got completed") });
+                    return job.waitForStatus('completed');
                 })
                 .all()
                 .then(function() {
