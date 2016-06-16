@@ -40,4 +40,5 @@ describe('teraslice - ', function() {
     //suites.push(require('./data/reindex-tests')());
     //suites.push(require('./cluster/worker-allocation-tests')());
     suites.push(require('./cluster/state-tests')());
+    //suites.push(require('./cluster/failure-tests')());
 });

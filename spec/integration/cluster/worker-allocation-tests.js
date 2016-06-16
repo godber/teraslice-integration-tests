@@ -3,9 +3,7 @@
 var _ = require('lodash');
 
 module.exports = function() {
-    var teraslice, es_client, es_helper, setup;
-
-    var watch = require('../helpers/watchers')();
+    var teraslice, es_client, es_helper, setup, watch;
 
     function workersTest(workers, workers_expected, records, done) {
         var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
@@ -122,5 +120,7 @@ module.exports = function() {
         teraslice = connections.teraslice_client;
         es_helper = require('../helpers/es_helper')(es_client);
         setup = connections.setup;
+
+        watch = require('../helpers/watchers')(connections);
     }
 }

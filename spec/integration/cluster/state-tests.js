@@ -3,9 +3,7 @@
 var _ = require('lodash');
 
 module.exports = function() {
-    var teraslice, es_client, es_helper, setup;
-
-    var watch = require('../helpers/watchers')();
+    var teraslice, es_client, es_helper, setup, watch;
 
     function verifyClusterState(state, node_count) {
         // 2 nodes by default
@@ -33,18 +31,8 @@ module.exports = function() {
         });
     }
 
-    function waitForNodes(node_count) {
-        return watch.waitForLength(function() {
-            return teraslice.cluster
-                .state()
-                .then(function(state) {
-                    return _.keys(state)
-                });
-        }, node_count);
-    }
-
     describe('cluster state', function() {
-        xit('Cluster state should match default configuration.', function(done) {
+        it('Cluster state should match default configuration.', function(done) {
             teraslice.cluster
                 .state()
                 .then(function(state) {
@@ -54,12 +42,12 @@ module.exports = function() {
                 .finally(done)
         });
 
-        xit('Cluster state should update after adding and removing a worker node.', function(done) {
+        it('Cluster state should update after adding and removing a worker node.', function(done) {
             // Add a second worker node
             setup.scale(2)
                 .then(function() {
                     // Wait for it to show up in cluster state.
-                    return waitForNodes(3);
+                    return watch.waitForNodes(3);
                 })
                 .then(teraslice.cluster.state)
                 .then(function(state) {
@@ -71,7 +59,7 @@ module.exports = function() {
                 })
                 .then(function() {
                     // Should just be 2 nodes now.
-                    return waitForNodes(2);
+                    return watch.waitForNodes(2);
                 })
                 .then(teraslice.cluster.state)
                 .then(function(state) {
@@ -81,12 +69,12 @@ module.exports = function() {
                 .finally(done)
         });
 
-        xit('Cluster state should update after adding and removing 20 worker nodes.', function(done) {
+        it('Cluster state should update after adding and removing 20 worker nodes.', function(done) {
             // Add additional worker nodes. There's one already and we want 20 more.
             setup.scale(21)
                 .then(function() {
                     // Wait for all the nodes to show up in cluster state.
-                    return waitForNodes(22);
+                    return watch.waitForNodes(22);
                 })
                 .then(teraslice.cluster.state)
                 .then(function(state) {
@@ -98,7 +86,7 @@ module.exports = function() {
                 })
                 .then(function() {
                     // Should just be 2 nodes now.
-                    return waitForNodes(2);
+                    return watch.waitForNodes(2);
                 })
                 .then(teraslice.cluster.state)
                 .then(function(state) {
@@ -108,7 +96,7 @@ module.exports = function() {
                 .finally(done)
         });
 
-        xit('Cluster state should be correct for running job with 1 worker.', function(done) {
+        it('Cluster state should be correct for running job with 1 worker.', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[0].index = 'example-logs-1000';
             job_spec.operations[1].index = 'test-clusterstate-job-1-1000';
@@ -130,19 +118,25 @@ module.exports = function() {
                                 expect(state[node].available).toBeLessThan(8);
                                 expect(state[node].available).toBeGreaterThan(5);
 
-                                // The default scheduler should allocate the slicer and the
-                                // worker on the same node leaving the cluster_master on
-                                // a node by itself.
-                                if (state[node].available === 7) {
-                                    expect(state[node].active.length).toBe(1);
-
+                                // The default scheduler should allocate the slicer on one
+                                // node and the worker on either node.
+                                if (state[node].active[0].assignment === 'cluster_master') {
                                     expect(state[node].active[0].worker_id).toBe(1);
                                     expect(state[node].active[0].assignment).toBe('cluster_master');
                                 }
                                 else {
-                                    expect(state[node].active.length).toBe(2);
                                     expect(state[node].active[0].assignment).toBe('slicer');
+                                }
+
+                                if (state[node].active.length > 1) {
                                     expect(state[node].active[1].assignment).toBe('worker');
+                                }
+
+                                if (state[node].available === 7) {
+                                    expect(state[node].active.length).toBe(1);
+                                }
+                                else {
+                                    expect(state[node].active.length).toBe(2);
                                 }
                             });
                         })
@@ -185,21 +179,29 @@ module.exports = function() {
                                 expect(state[node].available).toBeLessThan(7);
                                 expect(state[node].available).toBeGreaterThan(4);
 
-                                // The default scheduler should allocate the slicer and
-                                // 2 workers on the same node leaving the cluster_master on
-                                // a node with a single worker.
-                                if (state[node].available === 6) {
-                                    expect(state[node].active.length).toBe(2);
-
+                                // The default scheduler should allocate the slicer on one
+                                // node and the workers across the nodes.
+                                if (state[node].active[0].assignment === 'cluster_master') {
                                     expect(state[node].active[0].worker_id).toBe(1);
                                     expect(state[node].active[0].assignment).toBe('cluster_master');
-                                    expect(state[node].active[1].assignment).toBe('worker');
+                                }
+                                else {
+                                    expect(state[node].active[0].assignment).toBe('slicer');
+                                }
+
+                                // Both nodes should have at least one worker.
+                                expect(state[node].active[1].assignment).toBe('worker');
+
+                                // One of the nodes should have two
+                                if (state[node].active.length === 3) {
+                                    expect(state[node].active[2].assignment).toBe('worker');
+                                }
+
+                                if (state[node].available === 6) {
+                                    expect(state[node].active.length).toBe(2);
                                 }
                                 else {
                                     expect(state[node].active.length).toBe(3);
-                                    expect(state[node].active[0].assignment).toBe('slicer');
-                                    expect(state[node].active[1].assignment).toBe('worker');
-                                    expect(state[node].active[2].assignment).toBe('worker');
                                 }
                             });
                         })
@@ -224,5 +226,7 @@ module.exports = function() {
         teraslice = connections.teraslice_client;
         es_helper = require('../helpers/es_helper')(es_client);
         setup = connections.setup;
+
+        watch = require('../helpers/watchers')(connections);
     }
 }

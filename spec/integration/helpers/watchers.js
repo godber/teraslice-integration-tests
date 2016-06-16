@@ -1,8 +1,10 @@
 'use strict';
 
+var _ = require('lodash');
 var Promise = require('bluebird');
 
-module.exports = function() {
+module.exports = function(connections) {
+    var teraslice = connections.teraslice_client;
 
     /*
      * Waits for the promise returned by 'func' to resolve to an array
@@ -52,8 +54,22 @@ module.exports = function() {
         });
     }
 
+    /*
+     * Wait for 'node_count' nodes to be available.
+     */
+    function waitForNodes(node_count) {
+        return waitForLength(function() {
+            return teraslice.cluster
+                .state()
+                .then(function(state) {
+                    return _.keys(state)
+                });
+        }, node_count);
+    }
+
     return {
         waitForValue: waitForValue,
-        waitForLength: waitForLength
+        waitForLength: waitForLength,
+        waitForNodes: waitForNodes
     }
 }
