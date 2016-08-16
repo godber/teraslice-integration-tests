@@ -2,7 +2,6 @@
 
 // We need long timeouts for some of these jobs
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
-console.log('im getting run');
 
 describe('teraslice - ', function() {
 
@@ -37,9 +36,9 @@ describe('teraslice - ', function() {
         })
     }
 
+   // suites.push(require('./cluster/worker-allocation-tests')());
     suites.push(require('./cluster/state-tests')());
-    suites.push(require('./data/reindex-tests')());
-    suites.push(require('./cluster/worker-allocation-tests')());
-    suites.push(require('./validation/job-validation-tests')());
+   // suites.push(require('./data/reindex-tests')());
+   // suites.push(require('./validation/job-validation-tests')());
 
 });

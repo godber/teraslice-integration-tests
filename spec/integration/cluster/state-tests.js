@@ -229,4 +229,4 @@ module.exports = function() {
 
         watch = require('../helpers/watchers')(connections);
     }
-}
+};

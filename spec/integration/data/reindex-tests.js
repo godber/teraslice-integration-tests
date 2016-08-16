@@ -54,21 +54,15 @@ module.exports = function() {
                             return job.resume();
                         })
                         .then(function() {
-                            console.log('should call for running');
-
                             return job.waitForStatus('running');
                         })
                         .then(function() {
-                            console.log('should call forstop');
-
                             return job.stop();
                         })
                         .then(function() {
-                            console.log('should stop');
                             return job.waitForStatus('stopped');
                         })
                         .then(function() {
-                            console.log('should recover');
                             return job.recover();
                         })
                         .then(function() {
