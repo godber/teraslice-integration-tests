@@ -1,10 +1,6 @@
 'use strict';
 
 var Promise = require('bluebird');
-
-// TODO: This needs to be a dynamic option in some way. Maybe a ENV var.
-var DOCKER_IP = 'docker';
-
 var elasticsearch = require('elasticsearch');
 
 module.exports = function(compose_file) {
@@ -14,8 +10,11 @@ module.exports = function(compose_file) {
     var teraslice;
     var es_helper;
 
+    var DOCKER_IP = process.env.ip ? process.env.ip :'localhost';
+
     function dockerUp(index_to_watch) {
-        if (! index_to_watch) index_to_watch = 'teracluster__jobs';
+        
+        if (!index_to_watch) index_to_watch = 'teracluster__jobs';
 
         console.log("--> Bringing Docker environment up.");
         return new Promise(function(resolve, reject) {
@@ -61,14 +60,14 @@ module.exports = function(compose_file) {
             compose.up()
                 .then(function() {
                     es_client = new elasticsearch.Client({
-                        host: 'http://' + DOCKER_IP + ':9200',
+                        host: `http://${DOCKER_IP}:9210`,
                         log: '' // This suppresses error logging from the ES library.
-                    })
+                    });
 
                     es_helper = require('./es_helper')(es_client);
 
                     teraslice = require('teraslice-client-js')({
-                        host: 'http://' + DOCKER_IP + ':5678'
+                        host: `http://${DOCKER_IP}:5678`
                     });
 
                     console.log("--> Waiting for Elasticsearch to be ready.");
@@ -82,7 +81,6 @@ module.exports = function(compose_file) {
 
     function dockerDown() {
         console.log("\n--> Stopping Docker environment.");
-
         return es_helper
             .cleanup(false)
             .then(function() {
@@ -100,4 +98,4 @@ module.exports = function(compose_file) {
         dockerDown: dockerDown,
         scale: scale
     }
-}
+};

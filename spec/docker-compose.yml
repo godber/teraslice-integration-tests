@@ -20,8 +20,8 @@ services:
   elasticsearch:
     image: elasticsearch:2.3
     ports:
-        - "9200:9200"
-        - "9300:9300"
+        - "9210:9200"
+        - "9321:9300"
     volumes:
         - testdata:/usr/share/elasticsearch/data
         #- ./fixtures/data/es1:/usr/share/elasticsearch/data

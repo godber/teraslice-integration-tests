@@ -45,7 +45,7 @@ module.exports = function(connections) {
                         }
 
                         if (counter > iterations) {
-                            reject("waitForValue didn't find target value after " + iterations + " iterations.");
+                            reject(`waitForValue didn't find target value after ${iterations} iterations.`);
                         }
                     })
             }
@@ -72,4 +72,4 @@ module.exports = function(connections) {
         waitForLength: waitForLength,
         waitForNodes: waitForNodes
     }
-}
+};

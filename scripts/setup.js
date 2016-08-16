@@ -21,12 +21,12 @@ var generator = {
       "size": 5000
     }
   ]
-}
+};
 
 setup.dockerUp('teracluster__jobs')
     .then(function(connections) {
         function generate(count) {
-            generator.name = 'Data Generator ' + count
+            generator.name = 'Data Generator ' + count;
             generator.operations[0].size = count;
             generator.operations[1].index = 'example-logs-' + count;
             return teraslice.jobs.submit(generator)

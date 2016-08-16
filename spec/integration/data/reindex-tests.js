@@ -7,7 +7,9 @@ module.exports = function() {
     var teraslice, es_client, es_helper;
 
     describe('reindex', function() {
-        xit('should reindex data', function(done) {
+
+        console.log('we are now running the other code for reindex');
+        it('should reindex data', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[1].index = 'test-reindex-10';
 
@@ -52,16 +54,22 @@ module.exports = function() {
                             return job.resume();
                         })
                         .then(function() {
+                            console.log('should call for running');
+
                             return job.waitForStatus('running');
                         })
                         .then(function() {
+                            console.log('should call forstop');
+
                             return job.stop();
                         })
                         .then(function() {
+                            console.log('should stop');
                             return job.waitForStatus('stopped');
                         })
                         .then(function() {
-                            return job.start({ recover: true });
+                            console.log('should recover');
+                            return job.recover();
                         })
                         .then(function() {
                             return job.waitForStatus('completed');
@@ -114,4 +122,4 @@ module.exports = function() {
         teraslice = connections.teraslice_client;
         es_helper = require('../helpers/es_helper')(es_client);
     }
-}
+};

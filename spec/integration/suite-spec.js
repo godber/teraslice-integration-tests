@@ -2,8 +2,10 @@
 
 // We need long timeouts for some of these jobs
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
+console.log('im getting run');
 
 describe('teraslice - ', function() {
+
     var setup = require('./helpers/setup')(__dirname + '/../docker-compose.yml');
 
     // Whether the environment should be shutdown after the test run.
@@ -21,10 +23,9 @@ describe('teraslice - ', function() {
                 suites.forEach(function(suite) {
                     suite(connections);
                 });
+                console.log("--> Starting tests.");
 
                 done();
-
-                console.log("--> Starting tests.");
             })
     });
 
@@ -36,9 +37,9 @@ describe('teraslice - ', function() {
         })
     }
 
-    //suites.push(require('./validation/job-validation-tests')());
-    //suites.push(require('./data/reindex-tests')());
-    //suites.push(require('./cluster/worker-allocation-tests')());
     suites.push(require('./cluster/state-tests')());
-    //suites.push(require('./cluster/failure-tests')());
+    suites.push(require('./data/reindex-tests')());
+    suites.push(require('./cluster/worker-allocation-tests')());
+    suites.push(require('./validation/job-validation-tests')());
+
 });

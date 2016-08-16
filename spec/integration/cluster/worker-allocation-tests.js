@@ -7,45 +7,46 @@ module.exports = function() {
 
     function workersTest(workers, workers_expected, records, done) {
         var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
-            job_spec.operations[0].index = 'example-logs-' + records;
-            job_spec.operations[0].size = Math.round(records / workers);
-            job_spec.operations[1].index = 'test-allocation-' + workers + '-worker';
-            job_spec.workers = workers;
-
-            teraslice.jobs.submit(job_spec)
-                .then(function(job) {
-                    return job.waitForStatus('running')
-                        .then(function() {
-                            return job.workers()
-                        })
-                        .then(function(running_workers) {
-                            expect(running_workers.length).toBe(workers_expected);
-                        })
-                        .then(function() {
-                            return job.waitForStatus('completed');
-                        })
-                        .then(function() {
-                            return watch.waitForLength(job.workers, 0);
-                        })
-                        .then(function(worker_count) {
-                            expect(worker_count).toBe(0);
-                        })
-                        .then(function() {
-                            return es_helper.documentCountForIndex('test-allocation-' + workers + '-worker')
-                                .then(function(stats) {
-                                    expect(stats.count).toBe(records);
-                                    expect(stats.deleted).toBe(0);
-                                });
-                        });
-                })
-                .catch(fail)
-                .finally(done)
+        job_spec.operations[0].index = 'example-logs-' + records;
+        job_spec.operations[0].size = Math.round(records / workers);
+        job_spec.operations[1].index = 'test-allocation-' + workers + '-worker';
+        job_spec.workers = workers;
+        teraslice.jobs.submit(job_spec)
+            .then(function(job) {
+                return job.waitForStatus('running')
+                    .then(function() {
+                        return job.workers()
+                    })
+                    .then(function(running_workers) {
+                        expect(running_workers.length).toBe(workers_expected);
+                    })
+                    .then(function() {
+                        return job.waitForStatus('completed');
+                    })
+                    .then(function() {
+                        return watch.waitForLength(job.workers, 0);
+                    })
+                    .then(function(worker_count) {
+                        expect(worker_count).toBe(0);
+                    })
+                    .then(function() {
+                        return es_helper.documentCountForIndex('test-allocation-' + workers + '-worker')
+                            .then(function(stats) {
+                                expect(stats.count).toBe(records);
+                                expect(stats.deleted).toBe(0);
+                            });
+                    });
+            })
+            .catch(fail)
+            .finally(function() {
+                done()
+            })
     }
 
     describe('worker allocation', function() {
 
         it('Job should allocate with one worker.', function(done) {
-            workersTest(1, 1, 10, done);
+            workersTest(1, 1, 1000, done);
         });
 
         it('Job should allocate with 5 workers.', function(done) {
@@ -99,7 +100,7 @@ module.exports = function() {
                             expect(worker_count).toBe(0);
                         })
                         .then(function() {
-                            return es_helper.documentCountForIndex('test-allocation-' + workers + '-worker')
+                            return es_helper.documentCountForIndex(job_spec.operations[1].index)
                                 .then(function(stats) {
                                     expect(stats.count).toBe(records);
                                     expect(stats.deleted).toBe(0);
@@ -113,6 +114,7 @@ module.exports = function() {
                         .finally(done);
                 });
         });
+
     });
 
     return function(connections) {
@@ -123,4 +125,4 @@ module.exports = function() {
 
         watch = require('../helpers/watchers')(connections);
     }
-}
+};
