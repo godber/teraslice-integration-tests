@@ -6,6 +6,7 @@
         {
           "_op": "elasticsearch_reader",
           "index": "example-logs-10",
+          "type": "change",
           "size": 1000,
           "date_field_name": "created",
           "full_response": true

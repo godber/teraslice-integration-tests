@@ -114,4 +114,4 @@ module.exports = function() {
         teraslice = connections.teraslice_client;
         es_helper = require('../helpers/es_helper')(es_client);
     }
-}
+};

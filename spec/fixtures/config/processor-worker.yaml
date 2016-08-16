@@ -13,9 +13,7 @@ terafoundation:
 teraslice:
     ops_directory: '/app/source/examples/ops/'
     workers: 8
-
-    cluster:
-        master: false
-        master_hostname: "teraslice-master"
-        name: "teracluster"
+    master: false
+    master_hostname: "teraslice-master"
+    name: "teracluster"
 
