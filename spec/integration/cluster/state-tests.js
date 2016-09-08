@@ -5,6 +5,10 @@ var _ = require('lodash');
 module.exports = function() {
     var teraslice, es_client, es_helper, setup, watch;
 
+    function findWorkers(nodes, type) {
+         return _.filter(nodes, function(o) { return o.assignment === type; });
+    }
+
     function verifyClusterState(state, node_count) {
         // 2 nodes by default
         var nodes = _.keys(state);
@@ -22,8 +26,11 @@ module.exports = function() {
             if (state[node].available === 7) {
                 expect(state[node].active.length).toBe(1);
 
-                expect(state[node].active[0].worker_id).toBe(1);
-                expect(state[node].active[0].assignment).toBe('cluster_master');
+                var workers = findWorkers(state[node].active, 'cluster_master');
+
+                expect(workers.length).toBe(1)
+                expect(workers[0].assignment).toBe('cluster_master');
+                expect(workers[0].worker_id).toBe(1);
             }
             else {
                 expect(state[node].active.length).toBe(0);
@@ -120,16 +127,20 @@ module.exports = function() {
 
                                 // The default scheduler should allocate the slicer on one
                                 // node and the worker on either node.
-                                if (state[node].active[0].assignment === 'cluster_master') {
-                                    expect(state[node].active[0].worker_id).toBe(1);
-                                    expect(state[node].active[0].assignment).toBe('cluster_master');
+                                var workers = findWorkers(state[node].active, 'cluster_master');
+                                if (workers.length > 0) {
+                                    // Slicer should not be on the same node as the cluster_master
+                                    expect(workers[0].worker_id).toBe(1);
+                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(0);
                                 }
                                 else {
-                                    expect(state[node].active[0].assignment).toBe('slicer');
+                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(1);
                                 }
 
+                                // The node with more than one worker should have the actual worker
+                                // and there should only be one.
                                 if (state[node].active.length > 1) {
-                                    expect(state[node].active[1].assignment).toBe('worker');
+                                    expect(findWorkers(state[node].active, 'worker').length).toBe(1)
                                 }
 
                                 if (state[node].available === 7) {
@@ -178,23 +189,28 @@ module.exports = function() {
                                 // and one with 5 avail.
                                 expect(state[node].available).toBeLessThan(7);
                                 expect(state[node].available).toBeGreaterThan(4);
-
                                 // The default scheduler should allocate the slicer on one
-                                // node and the workers across the nodes.
-                                if (state[node].active[0].assignment === 'cluster_master') {
-                                    expect(state[node].active[0].worker_id).toBe(1);
-                                    expect(state[node].active[0].assignment).toBe('cluster_master');
+                                // node and the worker on either node.
+                                var workers = findWorkers(state[node].active, 'cluster_master');
+                                if (workers.length > 0) {
+                                    // Slicer should not be on the same node as the cluster_master
+                                    expect(workers[0].worker_id).toBe(1);
+                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(0);
                                 }
                                 else {
-                                    expect(state[node].active[0].assignment).toBe('slicer');
+                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(1);
                                 }
 
                                 // Both nodes should have at least one worker.
-                                expect(state[node].active[1].assignment).toBe('worker');
+                                expect(findWorkers(state[node].active, 'worker').length).toBeGreaterThan(0)
 
                                 // One of the nodes should have two
                                 if (state[node].active.length === 3) {
-                                    expect(state[node].active[2].assignment).toBe('worker');
+                                    expect(findWorkers(state[node].active, 'worker').length).toBe(2);
+                                }
+                                // And the other just one
+                                else {
+                                    expect(findWorkers(state[node].active, 'worker').length).toBe(1)
                                 }
 
                                 if (state[node].available === 6) {
