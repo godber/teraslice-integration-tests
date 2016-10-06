@@ -3,7 +3,7 @@ services:
   teraslice-master:
     image: teraslice
     ports:
-        - "5678:5678"
+        - "45678:45678"
     links:
         - elasticsearch
     volumes:
@@ -20,14 +20,14 @@ services:
   elasticsearch:
     image: elasticsearch:2.3
     ports:
-        - "9210:9200"
-        - "9321:9300"
+        - "49200:49200"
+        - "49300:49300"
     volumes:
         - testdata:/usr/share/elasticsearch/data
         #- ./fixtures/data/es1:/usr/share/elasticsearch/data
     environment:
         - ES_HEAP_SIZE=2G
-    command: elasticsearch -Des.network.host=0.0.0.0 -Dthreadpool.bulk.queue_size=2000
+    command: elasticsearch -Des.network.host=0.0.0.0 -Des.http.port=49200 -Des.transport.port=49300 -Des.cluster.name=teraslice-integration -Des.index.number_of_replicas=0 -Dthreadpool.bulk.queue_size=2000
 volumes:
   testdata:
     external: false
