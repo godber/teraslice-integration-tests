@@ -13,7 +13,7 @@ module.exports = function(compose_file) {
     var DOCKER_IP = process.env.ip ? process.env.ip :'localhost';
 
     function dockerUp(index_to_watch) {
-        
+
         if (!index_to_watch) index_to_watch = 'teracluster__jobs';
 
         console.log("--> Bringing Docker environment up.");
@@ -60,14 +60,14 @@ module.exports = function(compose_file) {
             compose.up()
                 .then(function() {
                     es_client = new elasticsearch.Client({
-                        host: `http://${DOCKER_IP}:9210`,
+                        host: `http://${DOCKER_IP}:49200`,
                         log: '' // This suppresses error logging from the ES library.
                     });
 
                     es_helper = require('./es_helper')(es_client);
 
                     teraslice = require('teraslice-client-js')({
-                        host: `http://${DOCKER_IP}:5678`
+                        host: `http://${DOCKER_IP}:45678`
                     });
 
                     console.log("--> Waiting for Elasticsearch to be ready.");

@@ -49,15 +49,15 @@ module.exports = function() {
             workersTest(1, 1, 1000, done);
         });
 
-        it('Job should allocate with 5 workers.', function(done) {
+        xit('Job should allocate with 5 workers.', function(done) {
             workersTest(5, 5, 10000, done)
         });
 
-        it('Job should run with 14 out of requested 20 workers.', function(done) {
+        xit('Job should run with 14 out of requested 20 workers.', function(done) {
             workersTest(20, 14, 10000, done)
         });
 
-        it('Job should scale from 14 to 20 workers.', function(done) {
+        xit('Job should scale from 14 to 20 workers.', function(done) {
             // Test cluster has 16 workers total.
             // 1 is consumed by the cluster_master. 1 by the slicer.
             // So the job should consume 14 to start.
