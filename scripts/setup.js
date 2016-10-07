@@ -1,26 +1,27 @@
 'use strict';
 
 var setup = require('../spec/integration/helpers/setup')(__dirname + '/../spec/docker-compose.yml');
+var Promise = require('bluebird');
 
 var generator = {
-  "name": "",
-  "lifecycle": "once",
-  "workers": 1,
-  "operations": [
-    {
-      "_op": "elasticsearch_data_generator",
-      "size": 0
-    },
-    {
-      "_op": "elasticsearch_index_selector",
-      "index": "",
-      "type": "events"
-    },
-    {
-      "_op": "elasticsearch_bulk",
-      "size": 5000
-    }
-  ]
+    "name": "",
+    "lifecycle": "once",
+    "workers": 1,
+    "operations": [
+        {
+            "_op": "elasticsearch_data_generator",
+            "size": 0
+        },
+        {
+            "_op": "elasticsearch_index_selector",
+            "index": "",
+            "type": "events"
+        },
+        {
+            "_op": "elasticsearch_bulk",
+            "size": 5000
+        }
+    ]
 };
 
 setup.dockerUp('teracluster__jobs')
@@ -42,10 +43,15 @@ setup.dockerUp('teracluster__jobs')
             generate(10000)
         ])
     })
-    .each(function(job) {
+    .map(function(job) {
         return job.waitForStatus('completed')
     })
-    .catch(console.log)
+    .then(function(arr) {
+        console.log('setup has made all the testing indices', arr)
+    })
+    .catch(function(err) {
+        console.log('we had an error in setup', typeof err)
+    })
     .finally(function() {
         setup.dockerDown()
             .catch(console.log)
