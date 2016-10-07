@@ -50,7 +50,7 @@ setup.dockerUp('teracluster__jobs')
         console.log('setup has made all the testing indices', arr)
     })
     .catch(function(err) {
-        console.log('we had an error in setup', typeof err)
+        console.log('we had an error in setup', err)
     })
     .finally(function() {
         setup.dockerDown()
