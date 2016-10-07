@@ -27,7 +27,7 @@ services:
         #- ./fixtures/data/es1:/usr/share/elasticsearch/data
     environment:
         - ES_HEAP_SIZE=2G
-    command: elasticsearch -Des.network.host=0.0.0.0 -Des.http.port=49200 -Des.transport.port=49300 -Des.cluster.name=teraslice-integration -Des.index.number_of_replicas=0 -Dthreadpool.bulk.queue_size=2000
+    command: elasticsearch -Des.network.host=0.0.0.0 -Des.http.port=49200 -Des.transport.tcp.port=49300 -Des.cluster.name=teraslice-integration -Des.index.number_of_replicas=0 -Dthreadpool.bulk.queue_size=2000
 volumes:
   testdata:
     external: false
