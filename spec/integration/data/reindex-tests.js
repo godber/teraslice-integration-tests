@@ -81,7 +81,7 @@ module.exports = function() {
         });
 
 
-        xit('should reindex data 10 times', function(done) {
+        it('should reindex data 10 times', function(done) {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[1].index = 'test-reindex-10times';
 
