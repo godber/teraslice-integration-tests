@@ -36,9 +36,10 @@ describe('teraslice - ', function() {
         })
     }
 
+    suites.push(require('./data/id_slicer')());
     suites.push(require('./cluster/worker-allocation-tests')());
-    //suites.push(require('./cluster/state-tests')());
-    //suites.push(require('./data/reindex-tests')());
-    //suites.push(require('./validation/job-validation-tests')());
+    suites.push(require('./cluster/state-tests')());
+    suites.push(require('./data/reindex-tests')());
+    suites.push(require('./validation/job-validation-tests')());
 
 });
