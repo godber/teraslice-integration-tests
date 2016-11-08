@@ -26,10 +26,22 @@ var generator = {
 
 setup.dockerUp('teracluster__jobs')
     .then(function(connections) {
+
         function generate(count) {
             generator.name = 'Data Generator ' + count;
             generator.operations[0].size = count;
             generator.operations[1].index = 'example-logs-' + count;
+            return teraslice.jobs.submit(generator)
+        }
+
+        function idGenerate(count, letter) {
+            generator.name = 'Data Generator ' + count;
+            generator.operations[0].size = count;
+            generator.operations[0].set_id = 'hexadecimal';
+            generator.operations[0].id_start_key = letter;
+            generator.operations[1].index = 'example-hexadecimal-logs';
+            generator.operations[1].id_field = 'id';
+
             return teraslice.jobs.submit(generator)
         }
 
@@ -40,7 +52,9 @@ setup.dockerUp('teracluster__jobs')
         return Promise.all([
             generate(10),
             generate(1000),
-            generate(10000)
+            generate(10000),
+            idGenerate(5000, 'd'),
+            idGenerate(5000, '3')
         ])
     })
     .map(function(job) {
