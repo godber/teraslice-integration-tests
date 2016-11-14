@@ -1,6 +1,8 @@
 'use strict';
 
-var setup = require('../spec/integration/helpers/setup')(__dirname + '/../spec/docker-compose.yml');
+var setup = require('../spec/integration/helpers/setup')(
+    `${__dirname}/../spec/docker-compose-es${process.env.npm_package_config_esVersion}.yml`
+);
 var Promise = require('bluebird');
 
 var generator = {

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node node_modules/jasmine/bin/jasmine",
+    "docker-clean": "docker kill $(docker ps -q --filter 'name=spec_\\.*'); docker rm -v $(docker ps -qa --filter 'name=spec_\\.*'); docker volume rm spec_testdata",
     "setup": "node scripts/setup.js"
   },
   "repository": {
@@ -25,10 +26,12 @@
   "dependencies": {
     "bluebird": "^3.4.0",
     "docker-compose-js": "terascope/docker-compose-js",
-    "teraslice-client-js": "terascope/teraslice-client-js",
     "elasticsearch": "^11.0.1",
     "jasmine": "^2.4.1",
     "lodash": "^4.13.1",
     "teraslice-client-js": "terascope/teraslice-client-js"
+  },
+  "config": {
+    "esVersion": 2.3
   }
 }
