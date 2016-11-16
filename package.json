@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "node node_modules/jasmine/bin/jasmine",
-    "docker-clean": "docker kill $(docker ps -q --filter 'name=spec_\\.*'); docker rm -v $(docker ps -qa --filter 'name=spec_\\.*'); docker volume rm spec_testdata",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "test-versions": "bash scripts/test-versions.sh",
+    "clean-docker": "docker kill $(docker ps -qa --filter 'name=spec_\\.*'); docker rm $(docker ps -qa --filter 'name=spec_\\.*'); docker volume rm spec_testdata",
+    "clean-logs": "rm -rf logs"
   },
   "repository": {
     "type": "git",

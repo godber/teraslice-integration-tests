@@ -56,7 +56,7 @@ docker containers and associated volumes with the following command:
 ```bash
 # This will delete all docker containers who's names begin with `spec_`.
 # THIS COULD RESULT IN DATA LOSS!
-npm run docker-clean
+npm run clean-docker
 ```
 
 # Other Elasticsearch Versions
@@ -99,6 +99,23 @@ to the default value with the following command:
 
 ```bash
 npm config delete teraslice-integration-tests:esVersion
+```
+
+# Testing All Supported Elasticsearch Versions
+
+The test suite can be run against ALL supported ES versions by running the
+following command
+
+```bash
+npm run test-versions
+```
+
+Some output will be printed to the screen, but much more will be stored in log
+files in the `logs/` directory.  You can look through them for details on error
+conditions.  The log directory can be removed with the following command:
+
+```bash
+npm run clean-logs
 ```
 
 ### Notes
