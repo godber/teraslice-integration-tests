@@ -10,6 +10,7 @@ function cleanup() {
 
 trap cleanup SIGINT
 
+mkdir logs
 echo "Test run began at: $(date)" | tee "logs/master.log"
 
 for version in "${versions[@]}"
@@ -25,7 +26,7 @@ do
 
     npm config set teraslice-integration-tests:esVersion ${version}
     echo "  Running setup for version ${version}." | tee -a "logs/master.log"
-    npm run setup | tee ${dir}/setup.log 2>&1
+    npm run setup | tee ${dir}/setup.log 2>&1 | tee -a "logs/master.log"
     sleep 5
 
     echo "  Running tests for version ${version}." | tee -a "logs/master.log"
