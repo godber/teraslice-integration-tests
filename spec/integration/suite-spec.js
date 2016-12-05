@@ -5,7 +5,9 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
 
 describe('teraslice - ', function() {
 
-    var setup = require('./helpers/setup')(__dirname + '/../docker-compose.yml');
+    var setup = require('./helpers/setup')(
+        `${__dirname}/../docker-compose-es${process.env.npm_package_config_esVersion}.yml`
+    );
 
     // Whether the environment should be shutdown after the test run.
     // While developing tests it can be advantageous to set this to false
@@ -35,7 +37,6 @@ describe('teraslice - ', function() {
                 .finally(done);
         })
     }
-
 
     suites.push(require('./data/id_slicer')());
     suites.push(require('./data/elasticsearch_bulk-tests')());

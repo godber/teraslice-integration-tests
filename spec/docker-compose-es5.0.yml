@@ -1,0 +1,31 @@
+version: '2'
+services:
+  teraslice-master:
+    image: teraslice
+    ports:
+        - "45678:45678"
+    links:
+        - elasticsearch
+    volumes:
+        - ./fixtures/config:/app/config
+    command: node /app/source/service.js -c /app/config/processor-master.yaml
+  teraslice-worker:
+    image: teraslice
+    links:
+        - teraslice-master
+        - elasticsearch
+    volumes:
+        - ./fixtures/config:/app/config
+    command: node /app/source/service.js -c /app/config/processor-worker.yaml
+  elasticsearch:
+    image: elasticsearch:5.0
+    ports:
+        - "49200:49200"
+        - "49300:49300"
+    volumes:
+        - testdata:/usr/share/elasticsearch/data
+        #- ./fixtures/data/es1:/usr/share/elasticsearch/data
+    command: elasticsearch -Enetwork.host=0.0.0.0 -Ehttp.port=49200 -Etransport.tcp.port=49300 -Ecluster.name=teraslice-integration -Ethread_pool.bulk.queue_size=2000
+volumes:
+  testdata:
+    external: false
