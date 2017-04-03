@@ -6,7 +6,9 @@ module.exports = function() {
     var teraslice, es_client, es_helper, setup, watch;
 
     function findWorkers(nodes, type) {
-         return _.filter(nodes, function(o) { return o.assignment === type; });
+        return _.filter(nodes, function(worker) {
+            return worker.assignment === type;
+        });
     }
 
     function verifyClusterState(state, node_count) {
@@ -28,9 +30,8 @@ module.exports = function() {
 
                 var workers = findWorkers(state[node].active, 'cluster_master');
 
-                expect(workers.length).toBe(1)
+                expect(workers.length).toBe(1);
                 expect(workers[0].assignment).toBe('cluster_master');
-                expect(workers[0].worker_id).toBe(1);
             }
             else {
                 expect(state[node].active.length).toBe(0);
@@ -56,7 +57,9 @@ module.exports = function() {
                     // Wait for it to show up in cluster state.
                     return watch.waitForNodes(3);
                 })
-                .then(teraslice.cluster.state)
+                .then(function() {
+                    return teraslice.cluster.state()
+                })
                 .then(function(state) {
                     verifyClusterState(state, 3);
                 })
@@ -68,7 +71,9 @@ module.exports = function() {
                     // Should just be 2 nodes now.
                     return watch.waitForNodes(2);
                 })
-                .then(teraslice.cluster.state)
+                .then(function() {
+                    return teraslice.cluster.state()
+                })
                 .then(function(state) {
                     verifyClusterState(state, 2);
                 })
@@ -83,7 +88,9 @@ module.exports = function() {
                     // Wait for all the nodes to show up in cluster state.
                     return watch.waitForNodes(22);
                 })
-                .then(teraslice.cluster.state)
+                .then(function() {
+                    return teraslice.cluster.state()
+                })
                 .then(function(state) {
                     verifyClusterState(state, 22);
                 })
@@ -95,7 +102,9 @@ module.exports = function() {
                     // Should just be 2 nodes now.
                     return watch.waitForNodes(2);
                 })
-                .then(teraslice.cluster.state)
+                .then(function() {
+                    return teraslice.cluster.state()
+                })
                 .then(function(state) {
                     verifyClusterState(state, 2);
                 })
@@ -113,7 +122,9 @@ module.exports = function() {
                     // The job may run for a while so we have to wait for it to finish.
                     return job
                         .waitForStatus('running')
-                        .then(teraslice.cluster.state)
+                        .then(function() {
+                            return teraslice.cluster.state()
+                        })
                         .then(function(state) {
                             var nodes = _.keys(state);
                             nodes.forEach(function(node) {
@@ -177,7 +188,9 @@ module.exports = function() {
                     // The job may run for a while so we have to wait for it to finish.
                     return job
                         .waitForStatus('running')
-                        .then(teraslice.cluster.state)
+                        .then(function() {
+                            return teraslice.cluster.state()
+                        })
                         .then(function(state) {
                             var nodes = _.keys(state);
                             nodes.forEach(function(node) {
