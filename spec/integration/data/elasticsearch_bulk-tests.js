@@ -24,7 +24,6 @@ module.exports = function() {
                     return es_helper.documentCountForIndex('test-multisend-10000')
                         .then(function(stats) {
                             expect(stats.count).toBe(10000);
-                            expect(stats.deleted).toBe(0);
                         });
                 })
                 .catch(fail)

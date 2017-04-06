@@ -17,7 +17,6 @@ module.exports = function() {
                 }) // This should throw a validation error.
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -29,7 +28,6 @@ module.exports = function() {
             teraslice.jobs.submit(job_spec)
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -44,7 +42,6 @@ module.exports = function() {
                 }) // This should throw a validation error.
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -59,7 +56,6 @@ module.exports = function() {
                 }) // This should throw a validation error.
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -74,7 +70,6 @@ module.exports = function() {
                 }) // This should throw a validation error.
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -89,7 +84,6 @@ module.exports = function() {
                 }) // This should throw a validation error.
                 .catch(function(err) {
                     expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
                 })
                 .finally(done)
         });
@@ -102,8 +96,7 @@ module.exports = function() {
                     fail("Submission should not succeed when job is empty")
                 }) // This should throw a validation error.
                 .catch(function(err) {
-                    expect(err.error).toBe(500);
-                    expect(err.message).toContain("Error validating")
+                    expect(err.error).toBe(400);
                 })
                 .finally(done)
         });
