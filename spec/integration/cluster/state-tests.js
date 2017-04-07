@@ -183,7 +183,7 @@ module.exports = function() {
                             var nodes = _.keys(state);
                             nodes.forEach(function(node) {
                                 expect(state[node].total).toBe(8);
-                               // console.log('state node', state[node])
+
                                 // There are 2 nodes in the cluster so the slicer
                                 // should go on one and the workers should spread
                                 // across the nodes leaving one with 6 workers avail
