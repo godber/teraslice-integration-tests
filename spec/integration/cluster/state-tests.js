@@ -41,8 +41,7 @@ module.exports = function() {
 
     describe('cluster state', function() {
         it('Cluster state should match default configuration.', function(done) {
-            teraslice.cluster
-                .state()
+            teraslice.cluster.state()
                 .then(function(state) {
                     verifyClusterState(state, 2);
                 })
@@ -136,18 +135,6 @@ module.exports = function() {
                                 expect(state[node].available).toBeLessThan(8);
                                 expect(state[node].available).toBeGreaterThan(5);
 
-                                // The default scheduler should allocate the slicer on one
-                                // node and the worker on either node.
-                                var workers = findWorkers(state[node].active, 'cluster_master');
-                                if (workers.length > 0) {
-                                    // Slicer should not be on the same node as the cluster_master
-                                    expect(workers[0].worker_id).toBe(1);
-                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(0);
-                                }
-                                else {
-                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(1);
-                                }
-
                                 // The node with more than one worker should have the actual worker
                                 // and there should only be one.
                                 if (state[node].active.length > 1) {
@@ -181,6 +168,7 @@ module.exports = function() {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.workers = 3;
             job_spec.operations[0].index = 'example-logs-1000';
+            job_spec.operations[0].size = 100;
             job_spec.operations[1].index = 'test-clusterstate-job-3-1000';
 
             teraslice.jobs.submit(job_spec)
@@ -195,27 +183,16 @@ module.exports = function() {
                             var nodes = _.keys(state);
                             nodes.forEach(function(node) {
                                 expect(state[node].total).toBe(8);
-
+                               // console.log('state node', state[node])
                                 // There are 2 nodes in the cluster so the slicer
                                 // should go on one and the workers should spread
                                 // across the nodes leaving one with 6 workers avail
                                 // and one with 5 avail.
                                 expect(state[node].available).toBeLessThan(7);
                                 expect(state[node].available).toBeGreaterThan(4);
-                                // The default scheduler should allocate the slicer on one
-                                // node and the worker on either node.
-                                var workers = findWorkers(state[node].active, 'cluster_master');
-                                if (workers.length > 0) {
-                                    // Slicer should not be on the same node as the cluster_master
-                                    expect(workers[0].worker_id).toBe(1);
-                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(0);
-                                }
-                                else {
-                                    expect(findWorkers(state[node].active, 'slicer').length).toBe(1);
-                                }
 
                                 // Both nodes should have at least one worker.
-                                expect(findWorkers(state[node].active, 'worker').length).toBeGreaterThan(0)
+                                expect(findWorkers(state[node].active, 'worker').length).toBeGreaterThan(0);
 
                                 // One of the nodes should have two
                                 if (state[node].active.length === 3) {
