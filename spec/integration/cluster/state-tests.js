@@ -5,10 +5,27 @@ var _ = require('lodash');
 module.exports = function() {
     var teraslice, es_client, es_helper, setup, watch;
 
-    function findWorkers(nodes, type) {
+    function findWorkers(nodes, type, ex_id) {
         return _.filter(nodes, function(worker) {
-            return worker.assignment === type;
+            if (ex_id) {
+                if (type) {
+                    return worker.assignment === type && worker.ex_id === ex_id;
+                }
+                else {
+                    return worker.ex_id === ex_id;
+                }
+            }
+            else {
+                return worker.assignment === type;
+            }
         });
+    }
+
+    function checkState(state, type, ex_id) {
+        return _.flatten(_.map(state, function(node, second) {
+            return findWorkers(node.active, type, ex_id)
+        })).length;
+       
     }
 
     function verifyClusterState(state, node_count) {
@@ -45,7 +62,10 @@ module.exports = function() {
                 .then(function(state) {
                     verifyClusterState(state, 2);
                 })
-                .catch(fail)
+                .catch(function(err) {
+                    console.log('what error', err)
+                    fail()
+                })
                 .finally(done)
         });
 
@@ -107,7 +127,9 @@ module.exports = function() {
                 .then(function(state) {
                     verifyClusterState(state, 2);
                 })
-                .catch(fail)
+                .catch(function(err) {
+                    fail()
+                })
                 .finally(done)
         });
 
@@ -115,9 +137,11 @@ module.exports = function() {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[0].index = 'example-logs-1000';
             job_spec.operations[1].index = 'test-clusterstate-job-1-1000';
+            var ex_id;
 
             teraslice.jobs.submit(job_spec)
                 .then(function(job) {
+                    ex_id = job.ex();
                     // The job may run for a while so we have to wait for it to finish.
                     return job
                         .waitForStatus('running')
@@ -138,7 +162,7 @@ module.exports = function() {
                                 // The node with more than one worker should have the actual worker
                                 // and there should only be one.
                                 if (state[node].active.length > 1) {
-                                    expect(findWorkers(state[node].active, 'worker').length).toBe(1)
+                                    expect(findWorkers(state[node].active, 'worker', ex_id).length).toBe(1)
                                 }
 
                                 if (state[node].available === 7) {
@@ -160,7 +184,10 @@ module.exports = function() {
                             expect(stats.deleted).toBe(0);
                         });
                 })
-                .catch(fail)
+                .catch(function(err) {
+                    console.log('is this failing', err);
+                    fail()
+                })
                 .finally(done)
         });
 
@@ -168,12 +195,15 @@ module.exports = function() {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.workers = 3;
             job_spec.operations[0].index = 'example-logs-1000';
-            job_spec.operations[0].size = 100;
+            job_spec.operations[0].size = 20;
             job_spec.operations[1].index = 'test-clusterstate-job-3-1000';
+            var ex_id;
 
             teraslice.jobs.submit(job_spec)
                 .then(function(job) {
                     // The job may run for a while so we have to wait for it to finish.
+                    ex_id = job.ex();
+
                     return job
                         .waitForStatus('running')
                         .then(function() {
@@ -192,16 +222,9 @@ module.exports = function() {
                                 expect(state[node].available).toBeGreaterThan(4);
 
                                 // Both nodes should have at least one worker.
-                                expect(findWorkers(state[node].active, 'worker').length).toBeGreaterThan(0);
+                                expect(findWorkers(state[node].active, 'worker', ex_id).length).toBeGreaterThan(0);
 
-                                // One of the nodes should have two
-                                if (state[node].active.length === 3) {
-                                    expect(findWorkers(state[node].active, 'worker').length).toBe(2);
-                                }
-                                // And the other just one
-                                else {
-                                    expect(findWorkers(state[node].active, 'worker').length).toBe(1)
-                                }
+                                expect(checkState(state, null, ex_id)).toBe(4);
 
                                 if (state[node].available === 6) {
                                     expect(state[node].active.length).toBe(2);
