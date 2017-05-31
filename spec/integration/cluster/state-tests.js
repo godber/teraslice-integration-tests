@@ -25,7 +25,7 @@ module.exports = function() {
         return _.flatten(_.map(state, function(node, second) {
             return findWorkers(node.active, type, ex_id)
         })).length;
-       
+
     }
 
     function verifyClusterState(state, node_count) {
@@ -37,13 +37,13 @@ module.exports = function() {
             expect(state[node].node_id).toBeDefined();
             expect(state[node].hostname).toBeDefined();
 
-            // Nodes should have either 7 or 8 workers.
+            // Nodes should have 6-8 workers available.
             expect(state[node].available).toBeLessThan(9);
-            expect(state[node].available).toBeGreaterThan(6);
+            expect(state[node].available).toBeGreaterThan(5);
 
-            // Should be one worker active if only 7 available
-            if (state[node].available === 7) {
-                expect(state[node].active.length).toBe(1);
+            // Should be two workers active if only 6 available
+            if (state[node].available === 6) {
+                expect(state[node].active.length).toBe(2);
 
                 var workers = findWorkers(state[node].active, 'cluster_master');
 
@@ -161,7 +161,7 @@ module.exports = function() {
 
                                 // The node with more than one worker should have the actual worker
                                 // and there should only be one.
-                                if (state[node].active.length > 1) {
+                                if (state[node].active.length > 2) {
                                     expect(findWorkers(state[node].active, 'worker', ex_id).length).toBe(1)
                                 }
 
@@ -217,21 +217,14 @@ module.exports = function() {
                                 // There are 2 nodes in the cluster so the slicer
                                 // should go on one and the workers should spread
                                 // across the nodes leaving one with 6 workers avail
-                                // and one with 5 avail.
+                                // and one with 4 avail.
                                 expect(state[node].available).toBeLessThan(7);
-                                expect(state[node].available).toBeGreaterThan(4);
+                                expect(state[node].available).toBeGreaterThan(3);
 
                                 // Both nodes should have at least one worker.
                                 expect(findWorkers(state[node].active, 'worker', ex_id).length).toBeGreaterThan(0);
 
                                 expect(checkState(state, null, ex_id)).toBe(4);
-
-                                if (state[node].available === 6) {
-                                    expect(state[node].active.length).toBe(2);
-                                }
-                                else {
-                                    expect(state[node].active.length).toBe(3);
-                                }
                             });
                         })
                         .then(function() {

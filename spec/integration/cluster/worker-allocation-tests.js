@@ -53,14 +53,14 @@ module.exports = function() {
             workersTest(5, 5, 10000, done)
         });
 
-        it('Job should run with 14 out of requested 20 workers.', function(done) {
-            workersTest(20, 14, 10000, done)
+        it('Job should run with 13 out of requested 20 workers.', function(done) {
+            workersTest(20, 13, 10000, done)
         });
 
-        it('Job should scale from 14 to 20 workers.', function(done) {
+        it('Job should scale from 13 to 20 workers.', function(done) {
             // Test cluster has 16 workers total.
             // 1 is consumed by the cluster_master. 1 by the slicer.
-            // So the job should consume 14 to start.
+            // So the job should consume 13 to start.
             // the when we add another worker. 8 more should become available.
             // And all 20 should schedule.
             var workers = 20;
@@ -69,7 +69,7 @@ module.exports = function() {
             var job_spec = _.cloneDeep(require('../../fixtures/jobs/reindex.json'));
             job_spec.operations[0].index = 'example-logs-' + records;
             job_spec.operations[0].size = Math.round(records / workers);
-            job_spec.operations[1].index = 'test-allocation-worker-scale-14-20';
+            job_spec.operations[1].index = 'test-allocation-worker-scale-13-20';
             job_spec.workers = workers;
 
             teraslice.jobs.submit(job_spec)
@@ -79,8 +79,8 @@ module.exports = function() {
                             return job.workers()
                         })
                         .then(function(running_workers) {
-                            // The job should only get 14 workers to start.
-                            expect(running_workers.length).toBe(14);
+                            // The job should only get 13 workers to start.
+                            expect(running_workers.length).toBe(13);
 
                             // We want 2 workers in the environment
                             return setup.scale(2);
